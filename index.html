@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Ролевой Генератор: Бункер & Мафия | Jackbox Колесо Игр</title>
+    <title>Ролевой Генератор: Бункер & Мафия | Jackbox Колесо</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,7 +24,6 @@
             margin: 0 auto;
         }
 
-        /* ГЛАВНЫЕ КНОПКИ РЕЖИМОВ + JACKBOX */
         .mode-bar {
             display: flex;
             justify-content: center;
@@ -68,7 +67,7 @@
             box-shadow: 0 3px 0 #6a1e12;
         }
 
-        /* КОЛЕСО БАРАБАНА */
+        /* КОЛЕСО */
         .wheel-overlay {
             position: fixed;
             top: 0;
@@ -84,7 +83,6 @@
             visibility: hidden;
             opacity: 0;
             transition: 0.2s;
-            font-family: monospace;
         }
         .wheel-overlay.active {
             visibility: visible;
@@ -107,17 +105,6 @@
             margin: 0 auto;
             box-shadow: 0 0 0 8px #4a3724, 0 0 0 14px #e0aa6e;
             cursor: pointer;
-            transition: 0.1s;
-        }
-        canvas:active {
-            transform: scale(0.98);
-        }
-        .wheel-title {
-            font-size: 1.7rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #ffda99;
-            text-shadow: 2px 2px 0 #7a3e1a;
         }
         .spin-btn {
             background: #ffb347;
@@ -135,7 +122,6 @@
         }
         .spin-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #9b4a0e;
         }
         .close-wheel {
             background: #5a3e2a;
@@ -269,6 +255,9 @@
             padding-bottom: 6px;
             border-bottom: 1px dashed #c0a86a;
         }
+        .mafia-card .char-property {
+            border-bottom-color: #7a4c5c;
+        }
         .prop-label {
             font-weight: 800;
             width: 125px;
@@ -329,14 +318,12 @@
     </div>
 </div>
 
-<!-- Барабан / Колесо Jackbox -->
+<!-- Барабан -->
 <div id="wheelModal" class="wheel-overlay">
     <div class="wheel-container">
         <div class="wheel-title">🎡 JACKBOX КОЛЕСО 🎡</div>
         <canvas id="wheelCanvas" width="450" height="450" style="width:100%; max-width:450px; height:auto; aspect-ratio:1/1"></canvas>
-        <div>
-            <button id="spinWheelBtn" class="spin-btn">🌀 КРУТИТЬ 🌀</button>
-        </div>
+        <div><button id="spinWheelBtn" class="spin-btn">🌀 КРУТИТЬ 🌀</button></div>
         <div id="wheelResult" class="result-text">Нажми на колесо или кнопку</div>
         <button id="closeWheelBtn" class="close-wheel">✖ Закрыть</button>
     </div>
@@ -344,7 +331,7 @@
 
 <script>
     // --------------------------------------------------------------
-    // 1. БУНКЕР: полная база
+    // 1. БУНКЕР
     // --------------------------------------------------------------
     const professions = [
         "Хирург", "Повар", "Инженер-механик", "Электрик", "Сантехник", "Агроном", "Ветеринар", "Психолог",
@@ -395,7 +382,7 @@
     });
 
     // --------------------------------------------------------------
-    // 2. МАФИЯ: распределение (Смерть/Вор при 10+)
+    // 2. МАФИЯ (без поля "Особенность")
     // --------------------------------------------------------------
     function getMafiaRolesDistribution(playersCount) {
         let roles = [];
@@ -414,23 +401,23 @@
     }
     function getRoleDescription(role) {
         switch(role) {
-            case "Мафия": return "🩸 Каждую ночь убивает мирного. Чат мафии.";
-            case "Дон мафии": return "👑 Проверяет роли, не может быть убит мафией.";
+            case "Мафия": return "🩸 Каждую ночь убивает мирного. Общаются в чате мафии.";
+            case "Дон мафии": return "👑 Может проверить роль игрока ночью. Не может быть убит мафией.";
             case "Доктор": return "💊 Лечит игрока ночью, спасает от убийства.";
             case "Комиссар": return "🔍 Проверяет: мафия или мирный.";
-            case "Маньяк": return "🔪 Одиночка, убивает каждую ночь, побеждает один.";
-            case "Смерть": return "💀 При своей гибели забирает одного игрока с собой.";
-            case "Вор": return "🎭 Крадёт способность цели (убить/вылечить/проверить) разово.";
-            default: return "🌾 Мирный житель. Голосует днём.";
+            case "Маньяк": return "🔪 Одиночка, убивает каждую ночь. Побеждает, если остаётся один.";
+            case "Смерть": return "💀 При своей гибели (днём или ночью) забирает одного игрока с собой.";
+            case "Вор": return "🎭 Один раз крадёт способность цели: если украл у мафии — может убить, у доктора — вылечить, у комиссара — проверить.";
+            default: return "🌾 Мирный житель. Днём голосует, ночью спит.";
         }
     }
     function getRoleExtra(role) {
-        if (role === "Вор") return "🎲 Один раз укради способность у любого: у мафии - убей, у доктора - вылечи.";
-        if (role === "Смерть") return "⚰️ Пассивно: когда умираешь, выбери жертву - она умирает с тобой.";
+        if (role === "Вор") return "🎲 Один раз укради способность у любого (убить/вылечить/проверить).";
+        if (role === "Смерть") return "⚰️ Пассивно: когда умираешь, выбери жертву — она умирает с тобой.";
         return "";
     }
     function generateMafiaCard(id, role) {
-        return { id, role, roleDescription: getRoleDescription(role), extra: getRoleExtra(role), flavor: randomElem(["Таинственный взгляд", "Все боятся", "Двойная жизнь", "Загадочная улыбка"]) };
+        return { id, role, roleDescription: getRoleDescription(role), extra: getRoleExtra(role) };
     }
 
     let currentMode = 'bunker';
@@ -452,17 +439,32 @@
         document.getElementById('cardsContainer').innerHTML = html;
         const oldStat = document.getElementById('mafia-stats'); if(oldStat) oldStat.remove();
     }
+    
     function renderMafia(cnt) {
         const rolesArr = getMafiaRolesDistribution(cnt);
         let players = []; for(let i=0;i<cnt;i++) players.push(generateMafiaCard(i+1, rolesArr[i]));
         let html = '';
         players.forEach(p => {
-            let icon = "🎭"; if(p.role==="Мафия") icon="🔪"; else if(p.role==="Дон мафии") icon="👑"; else if(p.role==="Доктор") icon="💊"; else if(p.role==="Комиссар") icon="🔍"; else if(p.role==="Маньяк") icon="🪦"; else if(p.role==="Смерть") icon="💀"; else if(p.role==="Вор") icon="🎭";
+            let icon = "🎭"; 
+            if(p.role==="Мафия") icon="🔪"; 
+            else if(p.role==="Дон мафии") icon="👑"; 
+            else if(p.role==="Доктор") icon="💊"; 
+            else if(p.role==="Комиссар") icon="🔍"; 
+            else if(p.role==="Маньяк") icon="🪦"; 
+            else if(p.role==="Смерть") icon="💀"; 
+            else if(p.role==="Вор") icon="🎭";
+            
             let extraBlock = p.extra ? `<div class="char-property"><span class="prop-label">Механика</span><span class="prop-value">✨ ${p.extra}</span></div>` : '';
+            // Стратегия/совет для роли (коротко)
+            let strategy = (p.role === "Мирный житель") ? "Анализируй, задавай вопросы, вычисляй мафию." : 
+                          (p.role === "Смерть") ? "Не раскрывайся рано, но можешь угрожать." : 
+                          (p.role === "Вор") ? "Выбери цель с умом, укради сильную способность." : 
+                          "Скрывай свои намерения, вводи в заблуждение.";
             html += `<div class="character-card mafia-card"><div class="character-header">${icon} Игрок ${p.id}</div>
                 <div class="char-property"><span class="prop-label">Роль</span><span class="prop-value"><strong style="background:#3c2a2f; padding:2px 12px; border-radius:32px;">${p.role}</strong></span></div>
-                <div class="char-property"><span class="prop-label">Способность</span><span class="prop-value">${p.roleDescription}</span></div>${extraBlock}
-                <div class="char-property"><span class="prop-label">Особенность</span><span class="prop-value">${p.flavor}</span></div>
+                <div class="char-property"><span class="prop-label">Способность</span><span class="prop-value">${p.roleDescription}</span></div>
+                ${extraBlock}
+                <div class="char-property"><span class="prop-label">Стратегия</span><span class="prop-value">${strategy}</span></div>
             </div>`;
         });
         document.getElementById('cardsContainer').innerHTML = html;
@@ -472,6 +474,7 @@
         let statText = `📜 Состав (${cnt} игроков): `; for(let [r,c] of Object.entries(roleCounts)) statText += `${r} — ${c}  `;
         statDiv.innerHTML = statText;
     }
+    
     function generateByMode(){
         let cnt = parseInt(document.getElementById('playersCount').value,10);
         if(isNaN(cnt)) cnt=10; cnt = Math.min(18,Math.max(4,cnt));
@@ -481,7 +484,7 @@
     }
 
     // --------------------------------------------------------------
-    // 3. JACKBOX КОЛЕСО - 6 ИГР
+    // 3. JACKBOX КОЛЕСО
     // --------------------------------------------------------------
     const JACKBOX_GAMES = [
         "🎮 ВЫЖИТЬ В ИНЕТЕ",
@@ -491,14 +494,10 @@
         "🔊 ЗВУК СЛУХ",
         "🔫 МАФИЯ"
     ];
-    const GAME_COLORS = [
-        "#E67E22", "#2ECC71", "#E74C3C", "#F1C40F", "#3498DB", "#9B59B6"
-    ];
+    const GAME_COLORS = ["#E67E22","#2ECC71","#E74C3C","#F1C40F","#3498DB","#9B59B6"];
     let wheelCanvas = null, ctx = null;
     let currentRotation = 0;
     let spinning = false;
-    let animationId = null;
-    let selectedGame = "";
 
     function drawWheel(rotationRad = 0) {
         if(!ctx) return;
@@ -514,12 +513,9 @@
             ctx.arc(centerX, centerY, radius, start, end);
             ctx.fillStyle = GAME_COLORS[i % GAME_COLORS.length];
             ctx.fill();
-            ctx.save();
-            ctx.shadowBlur = 0;
             ctx.strokeStyle = "#2c1e12";
             ctx.lineWidth = 2;
             ctx.stroke();
-            ctx.restore();
             ctx.fillStyle = "#fff9e8";
             ctx.font = `bold ${Math.max(12, Math.floor(radius * 0.1))}px "Segoe UI"`;
             ctx.save();
@@ -556,7 +552,7 @@
         if(spinning) return;
         spinning = true;
         const startRot = currentRotation;
-        const spins = Math.random() * 8 + 8; 
+        const spins = Math.random() * 8 + 8;
         const targetDelta = (Math.random() * Math.PI * 2) + spins * Math.PI * 2;
         const targetRotation = startRot + targetDelta;
         const duration = 1800;
@@ -574,7 +570,6 @@
                 currentRotation = targetRotation;
                 drawWheel(currentRotation);
                 const finalGame = getGameFromRotation(currentRotation);
-                selectedGame = finalGame;
                 document.getElementById('wheelResult').innerHTML = `🎉 ВЫБРАНО: ${finalGame} 🎉`;
                 spinning = false;
                 setTimeout(()=>{
@@ -608,17 +603,15 @@
             drawWheel(currentRotation);
         }
         document.getElementById('wheelResult').innerHTML = "Нажми КРУТИТЬ!";
-        selectedGame = "";
     }
     function closeWheel(){
         document.getElementById('wheelModal').classList.remove('active');
-        if(spinning){
-            spinning = false;
-            if(animationId) cancelAnimationFrame(animationId);
-        }
+        if(spinning){ spinning = false; }
     }
-    
-    // инициализация DOM
+
+    // --------------------------------------------------------------
+    // 4. ИНИЦИАЛИЗАЦИЯ
+    // --------------------------------------------------------------
     const bunkerBtn = document.getElementById('bunkerBtn');
     const mafiaBtn = document.getElementById('mafiaBtn');
     const jackBtn = document.getElementById('jackboxBtn');
@@ -635,9 +628,9 @@
     jackBtn.onclick = ()=>openWheel();
     document.getElementById('spinWheelBtn').onclick = ()=>{ if(!spinning) spinWheel(); };
     document.getElementById('closeWheelBtn').onclick = closeWheel;
-    wheelCanvas?.addEventListener('click', ()=>{ if(!spinning) spinWheel(); });
+    if(wheelCanvas) wheelCanvas.addEventListener('click', ()=>{ if(!spinning) spinWheel(); });
     
-    // старт с 10 игроками и мафией для демо
+    // Старт с 10 игроками, режим мафии (наглядно)
     document.getElementById('playersCount').value = 10;
     setMode('mafia');
 </script>
