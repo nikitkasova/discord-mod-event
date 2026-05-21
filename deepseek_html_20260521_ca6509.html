@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Генератор игр: Бункер и Мафия | Роли и персонажи</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a3c2c 0%, #0e2a1f 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Courier New', monospace;
+            padding: 24px 16px;
+            min-height: 100vh;
+            color: #f0f2e9;
+        }
+
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* шапка с кнопками режимов */
+        .mode-bar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 12px 32px;
+            border-radius: 60px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+            background: #2d2b26;
+            color: #ccc;
+            letter-spacing: 2px;
+        }
+
+        .mode-btn.active {
+            background: #d6a15a;
+            color: #1f2a1b;
+            box-shadow: 0 4px 0 #6b3f00;
+            transform: translateY(2px);
+        }
+
+        /* панель управления */
+        .control-panel {
+            background: #0f2a1ed9;
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 20px 28px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            border: 1px solid #b5a56e;
+            box-shadow: 0 12px 28px black;
+        }
+
+        .players-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .players-input label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            color: #fbd26a;
+        }
+
+        .players-input input {
+            font-size: 1.6rem;
+            width: 120px;
+            padding: 8px 12px;
+            text-align: center;
+            background: #2e2a24;
+            border: 2px solid #c2a15b;
+            border-radius: 40px;
+            color: #ffeaac;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .generate-btn {
+            background: #c97e2a;
+            border: none;
+            font-size: 1.7rem;
+            font-weight: bold;
+            padding: 10px 36px;
+            border-radius: 60px;
+            color: #1e2b16;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.1s linear;
+            box-shadow: 0 5px 0 #6a3e12;
+        }
+
+        .generate-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #6a3e12;
+        }
+
+        /* сетка карточек */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 28px;
+            margin-top: 20px;
+        }
+
+        /* карточка персонажа (бункер) */
+        .character-card {
+            background: #fef7e0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(210, 180, 110, 0.15) 2%, transparent 2.5%);
+            background-size: 28px 28px;
+            border-radius: 32px;
+            padding: 20px 18px;
+            box-shadow: 0 18px 28px -8px black;
+            border: 1px solid #e9cf8b;
+            transition: all 0.2s;
+            color: #2d2418;
+            font-family: 'Segoe UI', system-ui;
+        }
+
+        /* карточка роли мафии */
+        .mafia-card {
+            background: #2c1a1f;
+            background: linear-gradient(145deg, #2a1c1e, #1f1216);
+            border: 2px solid #b56576;
+            color: #f7e3af;
+            box-shadow: 0 18px 28px -5px black;
+        }
+        .mafia-card .character-header {
+            border-left-color: #e56b6f;
+            color: #f4acb7;
+            text-shadow: none;
+            background: none;
+            -webkit-background-clip: unset;
+        }
+        .mafia-card .prop-label {
+            color: #e28b8f;
+        }
+        .mafia-card .prop-value {
+            color: #f8f3dc;
+        }
+
+        .character-header {
+            font-size: 1.8rem;
+            font-weight: 800;
+            border-left: 8px solid #b87333;
+            padding-left: 16px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #4a2c1a, #3b2a1a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: #3b2a1a;
+            text-shadow: 2px 2px 0 #e9c891;
+        }
+
+        .char-property {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #c0a86a;
+            padding-bottom: 6px;
+        }
+        .mafia-card .char-property {
+            border-bottom-color: #7a4c5c;
+        }
+
+        .prop-label {
+            font-weight: 800;
+            width: 130px;
+            flex-shrink: 0;
+            color: #8b5a2b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prop-value {
+            flex: 1;
+            font-weight: 500;
+            color: #2e241b;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .role-badge {
+            background: #2c2b26;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            color: #ffd966;
+        }
+
+        .footer-warning {
+            text-align: center;
+            margin-top: 40px;
+            color: #bfc9b0;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 700px) {
+            .mode-btn {
+                font-size: 1.3rem;
+                padding: 8px 22px;
+            }
+            .prop-label {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="mode-bar">
+        <button id="bunkerBtn" class="mode-btn active">🏚️ БУНКЕР</button>
+        <button id="mafiaBtn" class="mode-btn">🔫 МАФИЯ</button>
+    </div>
+
+    <div class="control-panel">
+        <div class="players-input">
+            <label>👥 КОЛИЧЕСТВО ИГРОКОВ:</label>
+            <input type="number" id="playersCount" min="4" max="18" value="8" step="1">
+            <div style="font-size:0.7rem">от 4 до 18</div>
+        </div>
+        <button id="generateMainBtn" class="generate-btn">✨ ГЕНЕРИРОВАТЬ ✨</button>
+    </div>
+
+    <div id="cardsContainer" class="cards-grid">
+        <!-- динамическая генерация -->
+        <div style="grid-column:1/-1; text-align:center; padding:48px;">⚙️ Нажми «Сгенерировать»</div>
+    </div>
+    <div class="footer-warning">
+        🎭 Мафия: распределение ролей согласно правилам (дон, маньяк, док, комиссар). Бункер: уникальные личности.
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 1. БАЗЫ ДЛЯ БУНКЕРА
+    // --------------------------------------------------------------
+    const professions = [
+        "Хирург", "Повар", "Инженер-механик", "Электрик", "Сантехник", "Агроном", "Ветеринар", "Психолог",
+        "Пожарный", "Полицейский", "Военный", "Строитель", "Учитель физики", "Биолог", "Геолог", "Шахтёр",
+        "Водитель грузовика", "Моряк", "Лётчик", "IT-специалист", "Хакер", "Юрист", "Бармен", "Музыкант",
+        "Художник", "Фотограф", "Журналист", "Фермер", "Охотник", "Рыбак", "Кузнец", "Сварщик", "Стоматолог",
+        "Фармацевт", "Сапёр", "Разведчик", "Тренер по выживанию", "Метеоролог", "Археолог", "Клоун", "Священник"
+    ];
+    const genders = ["Мужской", "Женский"];
+    const getAge = () => Math.floor(Math.random() * 81) + 20;
+    const bodyTypes = ["Худощавое", "Атлетичное", "Крепкое", "Полноватое", "Мускулистое", "Низкорослое (153 см)",
+        "Высокое (190 см)", "Очень высокое (2 м)", "Сутулое", "Жилистое", "Коренастое", "Изящное",
+        "Массивное", "С широкими плечами", "Хрупкое телосложение", "Среднее телосложение"];
+    const healthIssues = ["Здоров абсолютно", "Язва желудка", "Астма", "Диабет 2 типа", "Аллергия на пыльцу", "Мигрень",
+        "Гипертония", "Артрит", "Близорукость", "Плохое зрение", "Сердечная недостаточность", "Хронический бронхит",
+        "Псориаз", "Панические атаки", "Бессонница", "Склонность к переломам", "Слабая иммунная система", "Гастрит"];
+    const hobbies = ["Боевые искусства", "Игра на гитаре", "Шахматы", "Альпинизм", "Плавание", "Бег", "Чтение классики",
+        "Выживание в дикой природе", "Кулинария", "Садоводство", "Пчеловодство", "Рыбалка", "Охота", "Стрельба",
+        "Паркур", "Танцы", "Каллиграфия", "Астрономия", "Медитация", "Рукоделие", "Ремонт авто", "Йога"];
+    const phobias = ["Энтомофобия (боязнь насекомых)", "Арахнофобия (пауки)", "Клаустрофобия (замкнутое пространство)",
+        "Акрофобия (высота)", "Никтофобия (темнота)", "Гемофобия (кровь)", "Танатофобия (смерть)", "Агорафобия",
+        "Социофобия", "Дентофобия", "Кинофобия (собаки)", "Офидиофобия (змеи)", "Трипофобия", "Астрапофобия (гроза)"];
+    const inventory = ["Упаковка антибиотиков (Раскрыта)", "Фонарик (сели батарейки)", "Нож выживания", "Аптечка с бинтами",
+        "Зажигалка и сухой спирт", "Свисток", "Карта местности", "Пара носков", "Консервная банка тушёнки",
+        "Пластиковая бутылка воды", "Заряженный пауэрбанк", "Книга 'Как выжить в бункере'", "Противогаз (фильтр старый)",
+        "Топор", "Моток верёвки 15м", "Компас", "Рюкзак с семенами", "Бинокль", "Рация (слабая батарея)"];
+    const facts = ["Пишет стихи (Раскрыта)", "Был чемпионом по борьбе", "Имеет двойное гражданство", "Знает 5 языков",
+        "В прошлом сидел в тюрьме", "Выиграл в лотерею миллион", "Скрывается от коллекторов", "Талантливый повар",
+        "Страдает лунатизмом", "Сделал тату на всё лицо", "Когда-то спас утопающего", "Работал в цирке",
+        "Владеет секретной информацией", "Обожает азартные игры", "Был в секте", "Изучал ядерную физику"];
+    const specialAbilities = [
+        "Игрок не может голосовать в ближайшем голосовании. Игрок может быть изгнан только единогласно.",
+        "В критический момент может восстановить здоровье любому игроку (1 раз).",
+        "Может тайно подсмотреть профессию одного игрока.",
+        "При голосовании его голос считается за два.",
+        "Иммунитет к первому исключению.",
+        "Может один раз обменять свой инвентарь с другим игроком.",
+        "Знает секретный код от оружейной комнаты (получит пистолет).",
+        "Может потребовать переголосования один раз за игру.",
+        "Никто не может узнать его возраст и факт (тайна личности)."
+    ];
+    const randomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const generateBunkerChar = (index) => ({
+        id: index,
+        profession: randomElem(professions),
+        gender: randomElem(genders),
+        age: getAge(),
+        body: randomElem(bodyTypes),
+        health: randomElem(healthIssues),
+        hobby: randomElem(hobbies),
+        phobia: randomElem(phobias),
+        inventory: randomElem(inventory),
+        fact: randomElem(facts),
+        special: randomElem(specialAbilities)
+    });
+
+    // --------------------------------------------------------------
+    // 2. ЛОГИКА МАФИИ (распределение ролей)
+    // --------------------------------------------------------------
+    // Если игроков меньше 8 -> 2 мафии, 1 доктор, 1 комиссар.
+    // Если 10+ -> 2 мафии, 1 дон мафия, 1 доктор, 1 комиссар, 1 маньяк.
+    // Для 8-9 игроков по умолчанию используем "меньше 8"? Нет: условие: если <8 то базовый набор, если >=10 то расширенный.
+    // Для 8 или 9 игроков — используем базовый набор (2 мафии, док, комиссар) + мирные.
+    // Также всегда соблюдаем: количество игроков = сумма ролей + мирные жители.
+    // Дон и маньяк добавляются только при 10+.
+    function getMafiaRolesDistribution(playersCount) {
+        // базовый костяк (минимум)
+        let roles = [];
+        if (playersCount < 8) {
+            // 2 мафии, 1 доктор, 1 комиссар
+            roles = ["Мафия", "Мафия", "Доктор", "Комиссар"];
+        } 
+        else if (playersCount >= 10) {
+            // 2 мафии + Дон мафия + Доктор + Комиссар + Маньяк
+            roles = ["Мафия", "Мафия", "Дон мафии", "Доктор", "Комиссар", "Маньяк"];
+        }
+        else { // playersCount === 8 или 9
+            roles = ["Мафия", "Мафия", "Доктор", "Комиссар"];
+        }
+        // остальные - мирные жители
+        let remaining = playersCount - roles.length;
+        for (let i = 0; i < remaining; i++) {
+            roles.push("Мирный житель");
+        }
+        // Перемешиваем массив ролей
+        for (let i = roles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [roles[i], roles[j]] = [roles[j], roles[i]];
+        }
+        return roles;
+    }
+
+    // Генерация карточек для мафии (краткое описание способностей)
+    function getRoleDescription(role) {
+        switch(role) {
+            case "Мафия": return "🩸 Каждую ночь убивает мирного. Общаются в чате мафии.";
+            case "Дон мафии": return "👑 Глава мафии. Проверяет роли или участвует в убийстве. Ночью не может быть убит.";
+            case "Доктор": return "💊 Лечит одного игрока ночью. Спасает от убийства.";
+            case "Комиссар": return "🔍 Проверяет одного игрока ночью: мафия или нет.";
+            case "Маньяк": return "🔪 Одиночка. Каждую ночь убивает, побеждает если остаётся один. Не зависит от мафии.";
+            default: return "🌾 Мирный житель. Днём голосует, ночью спит. Цель — вычислить мафию.";
+        }
+    }
+
+    function generateMafiaCard(playerId, role) {
+        return {
+            id: playerId,
+            role: role,
+            roleDescription: getRoleDescription(role),
+            // небольшой случайный факт для атмосферы
+            flavor: randomElem([
+                "Шепотом делится подозрениями", "Дрожит каждый вечер", "Имеет тайный знак", "Любит разоблачать",
+                "Нервно курит в углу", "Владеет уликами", "Знает городские легенды"
+            ])
+        };
+    }
+
+    // --------------------------------------------------------------
+    // 3. ОСНОВНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ И ОТРИСОВКИ
+    // --------------------------------------------------------------
+    let currentMode = 'bunker'; // 'bunker' или 'mafia'
+
+    // Рендер для бункера
+    function renderBunker(playersCount) {
+        let players = [];
+        for (let i = 1; i <= playersCount; i++) {
+            players.push(generateBunkerChar(i));
+        }
+        const container = document.getElementById('cardsContainer');
+        let html = '';
+        players.forEach(p => {
+            html += `
+                <div class="character-card">
+                    <div class="character-header">🧩 Игрок ${p.id}</div>
+                    <div class="char-property"><span class="prop-label">Профессия</span><span class="prop-value">${p.profession}</span></div>
+                    <div class="char-property"><span class="prop-label">Пол</span><span class="prop-value">${p.gender}</span></div>
+                    <div class="char-property"><span class="prop-label">Возраст</span><span class="prop-value">${p.age} лет</span></div>
+                    <div class="char-property"><span class="prop-label">Тело и рост</span><span class="prop-value">${p.body}</span></div>
+                    <div class="char-property"><span class="prop-label">Здоровье</span><span class="prop-value">${p.health}</span></div>
+                    <div class="char-property"><span class="prop-label">Хобби</span><span class="prop-value">${p.hobby}</span></div>
+                    <div class="char-property"><span class="prop-label">Фобия</span><span class="prop-value">${p.phobia}</span></div>
+                    <div class="char-property"><span class="prop-label">Инвентарь</span><span class="prop-value">${p.inventory}</span></div>
+                    <div class="char-property"><span class="prop-label">Факт</span><span class="prop-value">${p.fact}</span></div>
+                    <div class="char-property"><span class="prop-label">Спец. возможность</span><span class="prop-value">✨ ${p.special}</span></div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // Рендер для мафии (роли с красивым оформлением)
+    function renderMafia(playersCount) {
+        const rolesArray = getMafiaRolesDistribution(playersCount);
+        const mafiaPlayers = [];
+        for (let i = 0; i < playersCount; i++) {
+            mafiaPlayers.push(generateMafiaCard(i+1, rolesArray[i]));
+        }
+        const container = document.getElementById('cardsContainer');
+        let html = '';
+        mafiaPlayers.forEach(p => {
+            // дополнительная иконка под роль
+            let roleIcon = "🎭";
+            if (p.role === "Мафия") roleIcon = "🔪";
+            else if (p.role === "Дон мафии") roleIcon = "👑";
+            else if (p.role === "Доктор") roleIcon = "💊";
+            else if (p.role === "Комиссар") roleIcon = "🔍";
+            else if (p.role === "Маньяк") roleIcon = "🪦";
+            else roleIcon = "🌿";
+            html += `
+                <div class="character-card mafia-card">
+                    <div class="character-header">${roleIcon} Игрок ${p.id}</div>
+                    <div class="char-property" style="border-bottom: 1px solid #b56576;">
+                        <span class="prop-label">Роль</span>
+                        <span class="prop-value"><strong style="font-size:1.2rem; background:#3c2a2f; padding:2px 12px; border-radius:32px;">${p.role}</strong></span>
+                    </div>
+                    <div class="char-property">
+                        <span class="prop-label">Способность</span>
+                        <span class="prop-value">${p.roleDescription}</span>
+                    </div>
+                    <div class="char-property">
+                        <span class="prop-label">Особенность</span>
+                        <span class="prop-value">${p.flavor}</span>
+                    </div>
+                    <div class="char-property">
+                        <span class="prop-label">Совет</span>
+                        <span class="prop-value">${p.role === "Мирный житель" ? "Днём задавай вопросы, ищи противоречия." : "Используй силу с умом, не выдавай себя раньше времени."}</span>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        // дополнительно покажем сводку ролей внизу? сделаем небольшой блок подсказку
+        const stats = document.createElement('div');
+        // но чтобы не дублировать, добавим после контейнера краткую статистику
+        if (!document.getElementById('mafia-stats')) {
+            const statDiv = document.createElement('div');
+            statDiv.id = 'mafia-stats';
+            statDiv.style.marginTop = '20px';
+            statDiv.style.background = '#1e2a1faa';
+            statDiv.style.borderRadius = '2rem';
+            statDiv.style.padding = '12px 24px';
+            statDiv.style.textAlign = 'center';
+            statDiv.style.backdropFilter = 'blur(4px)';
+            container.parentNode.appendChild(statDiv);
+        }
+        const statSpan = document.getElementById('mafia-stats');
+        let roleCounts = {};
+        rolesArray.forEach(r => { roleCounts[r] = (roleCounts[r] || 0) + 1; });
+        let statText = `📜 Состав игры (${playersCount} игроков): `;
+        for (let [role, count] of Object.entries(roleCounts)) {
+            statText += `${role} — ${count}  `;
+        }
+        statSpan.innerHTML = statText;
+    }
+
+    function generateByMode() {
+        let countInput = document.getElementById('playersCount');
+        let raw = parseInt(countInput.value, 10);
+        if (isNaN(raw)) raw = 6;
+        let playersCount = Math.min(18, Math.max(4, raw));
+        if (playersCount !== raw) countInput.value = playersCount;
+
+        if (currentMode === 'bunker') {
+            renderBunker(playersCount);
+            // убираем возможную статистику мафии
+            const statBlock = document.getElementById('mafia-stats');
+            if (statBlock) statBlock.remove();
+        } 
+        else if (currentMode === 'mafia') {
+            renderMafia(playersCount);
+        }
+    }
+
+    // --------------------------------------------------------------
+    // 4. ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ И ИНИЦИАЛИЗАЦИЯ
+    // --------------------------------------------------------------
+    const bunkerBtn = document.getElementById('bunkerBtn');
+    const mafiaBtn = document.getElementById('mafiaBtn');
+    const generateBtn = document.getElementById('generateMainBtn');
+
+    function setActiveMode(mode) {
+        currentMode = mode;
+        if (mode === 'bunker') {
+            bunkerBtn.classList.add('active');
+            mafiaBtn.classList.remove('active');
+        } else {
+            mafiaBtn.classList.add('active');
+            bunkerBtn.classList.remove('active');
+        }
+        // При смене режима сразу генерируем для текущего количества игроков, но с новым режимом
+        generateByMode();
+    }
+
+    bunkerBtn.addEventListener('click', () => setActiveMode('bunker'));
+    mafiaBtn.addEventListener('click', () => setActiveMode('mafia'));
+    generateBtn.addEventListener('click', () => generateByMode());
+
+    // Начальная генерация (бункер по умолчанию, 8 игроков)
+    const initCountField = document.getElementById('playersCount');
+    if (!initCountField.value || initCountField.value < 4) initCountField.value = 8;
+    setActiveMode('bunker');
+</script>
+</body>
+</html>
