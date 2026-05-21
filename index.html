@@ -382,7 +382,7 @@
     });
 
     // --------------------------------------------------------------
-    // 2. МАФИЯ (без поля "Особенность")
+    // 2. МАФИЯ (полностью убрали "Особенность" — никакого flavor)
     // --------------------------------------------------------------
     function getMafiaRolesDistribution(playersCount) {
         let roles = [];
@@ -455,7 +455,6 @@
             else if(p.role==="Вор") icon="🎭";
             
             let extraBlock = p.extra ? `<div class="char-property"><span class="prop-label">Механика</span><span class="prop-value">✨ ${p.extra}</span></div>` : '';
-            // Стратегия/совет для роли (коротко)
             let strategy = (p.role === "Мирный житель") ? "Анализируй, задавай вопросы, вычисляй мафию." : 
                           (p.role === "Смерть") ? "Не раскрывайся рано, но можешь угрожать." : 
                           (p.role === "Вор") ? "Выбери цель с умом, укради сильную способность." : 
@@ -630,7 +629,6 @@
     document.getElementById('closeWheelBtn').onclick = closeWheel;
     if(wheelCanvas) wheelCanvas.addEventListener('click', ()=>{ if(!spinning) spinWheel(); });
     
-    // Старт с 10 игроками, режим мафии (наглядно)
     document.getElementById('playersCount').value = 10;
     setMode('mafia');
 </script>
