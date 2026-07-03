@@ -1,636 +1,387 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Ролевой Генератор: Бункер & Мафия | Jackbox Колесо</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Bot Privacy Policy</title>
+  <style>
+    /* ----- reset & base ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            background: linear-gradient(145deg, #1a3c2c 0%, #0e2a1f 100%);
-            font-family: 'Segoe UI', 'Roboto', 'Courier New', monospace;
-            padding: 24px 16px;
-            min-height: 100vh;
-            color: #f0f2e9;
-        }
+    body {
+      background: #0e0e10;
+      font-family: 'Segoe UI', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+      color: #f0f2f5;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+    }
 
-        .app {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .container {
+      max-width: 880px;
+      width: 100%;
+      background: #1a1a1f;
+      border-radius: 36px;
+      padding: 2.8rem 2.8rem 2.2rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      transition: box-shadow 0.25s ease;
+      backdrop-filter: blur(2px);
+    }
 
-        .mode-bar {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
+    /* ----- typography & discord flavour ----- */
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f0f2f5 0%, #b0b8c4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.2rem;
+      line-height: 1.2;
+    }
 
-        .mode-btn {
-            font-size: 1.6rem;
-            font-weight: bold;
-            padding: 10px 28px;
-            border-radius: 60px;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.2s;
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
-            background: #2d2b26;
-            color: #ccc;
-            letter-spacing: 2px;
-        }
+    .subhead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      border-bottom: 1px solid #2c2c33;
+      padding-bottom: 1.25rem;
+      margin-bottom: 2.2rem;
+    }
 
-        .mode-btn.active {
-            background: #d6a15a;
-            color: #1f2a1b;
-            box-shadow: 0 4px 0 #6b3f00;
-            transform: translateY(2px);
-        }
+    .last-updated {
+      font-size: 0.95rem;
+      color: #a8acb8;
+      background: #25252b;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      letter-spacing: 0.3px;
+      border: 1px solid #2f2f36;
+    }
 
-        .jackbox-btn {
-            background: #b83b2e;
-            color: #ffe7b0;
-            box-shadow: 0 6px 0 #6a1e12;
-            font-size: 1.6rem;
-            padding: 10px 28px;
-        }
+    /* ----- cards (animated) ----- */
+    .card-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 0.25rem;
+    }
 
-        .jackbox-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 3px 0 #6a1e12;
-        }
+    .policy-card {
+      background: #1f1f25;
+      border-radius: 28px;
+      padding: 1.6rem 1.8rem;
+      border: 1px solid #2a2a31;
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), 
+                  box-shadow 0.3s ease,
+                  border-color 0.2s;
+      box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.4);
+      will-change: transform;
+    }
 
-        /* КОЛЕСО */
-        .wheel-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-        }
-        .wheel-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        .wheel-container {
-            background: #261f16;
-            border-radius: 64px;
-            padding: 30px 20px 40px;
-            text-align: center;
-            max-width: 550px;
-            width: 90%;
-            box-shadow: 0 30px 40px black;
-            border: 3px solid #f5c27b;
-        }
-        canvas {
-            background: #2c241a;
-            border-radius: 50%;
-            display: block;
-            margin: 0 auto;
-            box-shadow: 0 0 0 8px #4a3724, 0 0 0 14px #e0aa6e;
-            cursor: pointer;
-        }
-        .spin-btn {
-            background: #ffb347;
-            border: none;
-            font-size: 1.8rem;
-            font-weight: bold;
-            padding: 12px 28px;
-            margin-top: 25px;
-            border-radius: 60px;
-            cursor: pointer;
-            font-family: inherit;
-            box-shadow: 0 5px 0 #9b4a0e;
-            transition: 0.05s linear;
-            color: #2c1a0e;
-        }
-        .spin-btn:active {
-            transform: translateY(2px);
-        }
-        .close-wheel {
-            background: #5a3e2a;
-            border: none;
-            font-size: 1.2rem;
-            margin-top: 16px;
-            padding: 6px 24px;
-            border-radius: 40px;
-            color: #ffd49f;
-            cursor: pointer;
-        }
-        .result-text {
-            font-size: 1.4rem;
-            margin-top: 20px;
-            background: #00000099;
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-        }
+    .policy-card:hover {
+      transform: translateY(-4px);
+      border-color: #40404a;
+      box-shadow: 0 18px 28px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
 
-        .control-panel {
-            background: #0f2a1ed9;
-            backdrop-filter: blur(4px);
-            border-radius: 48px;
-            padding: 20px 28px;
-            margin-bottom: 40px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-            border: 1px solid #b5a56e;
-            box-shadow: 0 12px 28px black;
-        }
+    /* staggered animation on load (no JS, pure CSS) */
+    .policy-card {
+      opacity: 0;
+      animation: cardFadeIn 0.6s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+    }
 
-        .players-input {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+    .policy-card:nth-child(1) { animation-delay: 0.02s; }
+    .policy-card:nth-child(2) { animation-delay: 0.07s; }
+    .policy-card:nth-child(3) { animation-delay: 0.12s; }
+    .policy-card:nth-child(4) { animation-delay: 0.17s; }
+    .policy-card:nth-child(5) { animation-delay: 0.22s; }
+    .policy-card:nth-child(6) { animation-delay: 0.27s; }
+    .policy-card:nth-child(7) { animation-delay: 0.32s; }
 
-        .players-input label {
-            font-weight: bold;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            color: #fbd26a;
-        }
+    @keyframes cardFadeIn {
+      0% { opacity: 0; transform: translateY(18px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        .players-input input {
-            font-size: 1.6rem;
-            width: 120px;
-            padding: 8px 12px;
-            text-align: center;
-            background: #2e2a24;
-            border: 2px solid #c2a15b;
-            border-radius: 40px;
-            color: #ffeaac;
-            font-weight: bold;
-            font-family: monospace;
-        }
+    .policy-card h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #e6e8ed;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      border-bottom: 1px dashed #32323b;
+      padding-bottom: 0.45rem;
+    }
 
-        .generate-btn {
-            background: #c97e2a;
-            border: none;
-            font-size: 1.7rem;
-            font-weight: bold;
-            padding: 10px 36px;
-            border-radius: 60px;
-            color: #1e2b16;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.1s linear;
-            box-shadow: 0 5px 0 #6a3e12;
-        }
+    /* small decorative icon accent (pure css) */
+    .policy-card h2::before {
+      content: "◆";
+      font-size: 0.9rem;
+      color: #5c6b7e;
+      opacity: 0.6;
+      margin-right: 0.1rem;
+    }
 
-        .generate-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #6a3e12;
-        }
+    .policy-card p,
+    .policy-card li {
+      color: #c9cdd6;
+      font-size: 1rem;
+      margin-bottom: 0.45rem;
+    }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 28px;
-            margin-top: 20px;
-        }
+    .policy-card ul {
+      list-style: none;
+      padding-left: 0.2rem;
+      margin: 0.25rem 0 0.2rem;
+    }
 
-        .character-card {
-            background: #fef7e0;
-            background-image: radial-gradient(circle at 10% 20%, rgba(210, 180, 110, 0.15) 2%, transparent 2.5%);
-            background-size: 28px 28px;
-            border-radius: 32px;
-            padding: 20px 18px;
-            box-shadow: 0 18px 28px -8px black;
-            border: 1px solid #e9cf8b;
-            transition: all 0.2s;
-            color: #2d2418;
-            font-family: 'Segoe UI', system-ui;
-        }
+    .policy-card ul li {
+      position: relative;
+      padding-left: 1.6rem;
+      margin-bottom: 0.3rem;
+    }
 
-        .mafia-card {
-            background: linear-gradient(145deg, #2a1c1e, #1f1216);
-            border: 2px solid #b56576;
-            color: #f7e3af;
-        }
-        .mafia-card .character-header {
-            border-left-color: #e56b6f;
-            color: #f4acb7;
-            background: none;
-            -webkit-background-clip: unset;
-            text-shadow: none;
-        }
-        .mafia-card .prop-label {
-            color: #e28b8f;
-        }
-        .mafia-card .prop-value {
-            color: #f8f3dc;
-        }
-        .character-header {
-            font-size: 1.8rem;
-            font-weight: 800;
-            border-left: 8px solid #b87333;
-            padding-left: 16px;
-            margin-bottom: 20px;
-        }
-        .char-property {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px dashed #c0a86a;
-        }
-        .mafia-card .char-property {
-            border-bottom-color: #7a4c5c;
-        }
-        .prop-label {
-            font-weight: 800;
-            width: 125px;
-            flex-shrink: 0;
-            color: #8b5a2b;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .prop-value {
-            flex: 1;
-            font-weight: 500;
-            color: #2e241b;
-            font-size: 1rem;
-        }
-        .stats-banner {
-            margin-top: 24px;
-            background: #1e2a1faa;
-            backdrop-filter: blur(4px);
-            border-radius: 2rem;
-            padding: 12px 24px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .footer-warning {
-            text-align: center;
-            margin-top: 40px;
-            color: #bfc9b0;
-            font-size: 0.85rem;
-        }
-        @media (max-width: 700px) {
-            .mode-btn, .jackbox-btn { font-size: 1.2rem; padding: 6px 16px; }
-            .prop-label { width: 100px; }
-        }
-    </style>
+    .policy-card ul li::before {
+      content: "▹";
+      position: absolute;
+      left: 0.1rem;
+      color: #6f7f92;
+      font-size: 1.1rem;
+    }
+
+    .policy-card strong {
+      color: #eef0f5;
+      font-weight: 600;
+    }
+
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.7rem;
+      margin-top: 0.3rem;
+    }
+
+    .badge-item {
+      background: #28282f;
+      padding: 0.15rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      color: #bcc1cc;
+      border: 1px solid #34343d;
+      letter-spacing: 0.2px;
+    }
+
+    /* ----- footer ----- */
+    .footer {
+      margin-top: 2.8rem;
+      padding-top: 1.8rem;
+      border-top: 1px solid #292931;
+      text-align: center;
+      color: #7c8291;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+    }
+
+    .footer span {
+      background: #1a1a20;
+      padding: 0.2rem 1.4rem;
+      border-radius: 60px;
+      border: 1px solid #2d2d36;
+      display: inline-block;
+    }
+
+    /* ----- responsive adjustments ----- */
+    @media (max-width: 700px) {
+      body {
+        padding: 1rem 0.8rem;
+      }
+      .container {
+        padding: 1.8rem 1.2rem 1.6rem;
+        border-radius: 28px;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+      .subhead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        padding-bottom: 1rem;
+      }
+      .policy-card {
+        padding: 1.2rem 1.2rem;
+      }
+      .policy-card h2 {
+        font-size: 1.25rem;
+      }
+      .badge-item {
+        font-size: 0.75rem;
+        padding: 0.1rem 0.8rem;
+      }
+    }
+
+    @media (max-width: 440px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      .container {
+        padding: 1.2rem 0.9rem;
+      }
+      .policy-card {
+        padding: 1rem 0.9rem;
+        border-radius: 20px;
+      }
+      .last-updated {
+        font-size: 0.8rem;
+        padding: 0.15rem 0.7rem;
+      }
+      .footer span {
+        font-size: 0.8rem;
+        padding: 0.1rem 0.8rem;
+      }
+    }
+
+    /* extra polish: subtle glow on card hover */
+    .policy-card:hover {
+      box-shadow: 0 18px 30px -12px #0a0a0e, 0 0 0 1px #3d3d48;
+    }
+
+    /* discord-like subtle scroll */
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: #141418;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2d2d38;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3d3d4a;
+    }
+
+    /* all links (if any) – but we have none */
+    a {
+      color: #9bb7dd;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* extra spacing for data list */
+    .compact-list {
+      margin-top: 0.1rem;
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-    <div class="mode-bar">
-        <button id="bunkerBtn" class="mode-btn active">🏚️ БУНКЕР</button>
-        <button id="mafiaBtn" class="mode-btn">🔫 МАФИЯ</button>
-        <button id="jackboxBtn" class="mode-btn jackbox-btn">🎲 JACKBOX 🎲</button>
+  <div class="container">
+
+    <h1>Test Bot Privacy Policy</h1>
+    <div class="subhead">
+      <span class="last-updated">📅 Last Updated: July 2, 2026</span>
+      <span style="color:#7e8596; font-size:0.9rem;">Dimensions Studio</span>
     </div>
 
-    <div class="control-panel">
-        <div class="players-input">
-            <label>👥 КОЛИЧЕСТВО ИГРОКОВ:</label>
-            <input type="number" id="playersCount" min="4" max="18" value="10" step="1">
-            <div style="font-size:0.7rem">от 4 до 18</div>
+    <!-- CARDS (each section as a card) -->
+    <div class="card-grid">
+
+      <!-- Information We Collect -->
+      <div class="policy-card">
+        <h2>Information We Collect</h2>
+        <p>Test Bot may process:</p>
+        <ul>
+          <li><strong>Discord User IDs</strong></li>
+          <li><strong>Discord Server IDs</strong></li>
+          <li><strong>Channel IDs</strong></li>
+          <li><strong>Role IDs</strong></li>
+          <li><strong>Messages sent as commands</strong> to the bot</li>
+          <li><strong>Server configuration</strong> required for bot features</li>
+        </ul>
+        <div class="badge-list" style="margin-top:0.6rem;">
+          <span class="badge-item">🔹 minimal</span>
+          <span class="badge-item">🔹 command-only</span>
         </div>
-        <button id="generateMainBtn" class="generate-btn">✨ ГЕНЕРИРОВАТЬ ✨</button>
+      </div>
+
+      <!-- How We Use Information -->
+      <div class="policy-card">
+        <h2>How We Use Information</h2>
+        <p>The collected information is used only to:</p>
+        <ul>
+          <li>Provide bot functionality</li>
+          <li>Execute commands</li>
+          <li>Store server settings</li>
+          <li>Improve stability and performance</li>
+          <li>Prevent abuse</li>
+        </ul>
+        <p style="margin-top:0.5rem; font-size:0.95rem; color:#b5bac7;">No data is used for marketing or profiling.</p>
+      </div>
+
+      <!-- Data Sharing -->
+      <div class="policy-card">
+        <h2>Data Sharing</h2>
+        <p><strong>We do not sell, rent, or share your data</strong> with third parties unless required by law.</p>
+        <div style="margin-top:0.4rem; background:#1b1b21; border-radius:60px; padding:0.2rem 1rem; display:inline-block; border:1px solid #2f2f39;">
+          <span style="color:#9aa3b5;">🔒 zero third‑party sharing</span>
+        </div>
+      </div>
+
+      <!-- Data Retention -->
+      <div class="policy-card">
+        <h2>Data Retention</h2>
+        <p>Data is stored only as long as necessary for the bot to function and may be deleted upon request where possible.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
+          <span class="badge-item">⏳ temporary</span>
+          <span class="badge-item">🧹 request deletion</span>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="policy-card">
+        <h2>Security</h2>
+        <p>We take reasonable measures to protect stored information, but no online service can guarantee absolute security.</p>
+        <p style="font-size:0.9rem; color:#a2a9b8; margin-top:0.2rem;">🔐 encrypted storage · access restricted</p>
+      </div>
+
+      <!-- Contact & Changes (combined into two cards, but we keep them separate for clarity) -->
+      <div class="policy-card">
+        <h2>Contact</h2>
+        <p><strong>Developer:</strong> Dimensions Studio</p>
+        <p>For questions regarding this Privacy Policy, contact the developer through <strong>Discord</strong>.</p>
+        <div style="background:#1e1e26; border-radius:40px; padding:0.25rem 1.2rem; display:inline-block; margin-top:0.2rem; border:1px solid #31313b;">
+          <span style="color:#b5bed0;">✉️ Discord: @DimensionsStudio</span>
+        </div>
+      </div>
+
+      <div class="policy-card">
+        <h2>Changes</h2>
+        <p>This Privacy Policy may be updated at any time. Continued use of <strong>Test Bot</strong> means you accept the latest version.</p>
+        <p style="margin-top:0.3rem; font-size:0.9rem; color:#8d95a6;">📌 version 1.0 · effective July 2, 2026</p>
+      </div>
+
+    </div> <!-- /card-grid -->
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <span>© 2026 Dimensions Studio. All rights reserved.</span>
     </div>
 
-    <div id="cardsContainer" class="cards-grid"></div>
-    <div class="footer-warning">
-        🎡 Jackbox Колесо: выбери игру случайным образом! <br>
-        💀 Мафия 10+ : Смерть, Вор, Дон, Маньяк. Бункер — полная генерация личностей.
-    </div>
-</div>
-
-<!-- Барабан -->
-<div id="wheelModal" class="wheel-overlay">
-    <div class="wheel-container">
-        <div class="wheel-title">🎡 JACKBOX КОЛЕСО 🎡</div>
-        <canvas id="wheelCanvas" width="450" height="450" style="width:100%; max-width:450px; height:auto; aspect-ratio:1/1"></canvas>
-        <div><button id="spinWheelBtn" class="spin-btn">🌀 КРУТИТЬ 🌀</button></div>
-        <div id="wheelResult" class="result-text">Нажми на колесо или кнопку</div>
-        <button id="closeWheelBtn" class="close-wheel">✖ Закрыть</button>
-    </div>
-</div>
-
-<script>
-    // --------------------------------------------------------------
-    // 1. БУНКЕР
-    // --------------------------------------------------------------
-    const professions = [
-        "Хирург", "Повар", "Инженер-механик", "Электрик", "Сантехник", "Агроном", "Ветеринар", "Психолог",
-        "Пожарный", "Полицейский", "Военный", "Строитель", "Учитель физики", "Биолог", "Геолог", "Шахтёр",
-        "Водитель грузовика", "Моряк", "Лётчик", "IT-специалист", "Хакер", "Юрист", "Бармен", "Музыкант",
-        "Художник", "Фотограф", "Журналист", "Фермер", "Охотник", "Рыбак", "Кузнец", "Сварщик", "Стоматолог",
-        "Фармацевт", "Сапёр", "Разведчик", "Тренер по выживанию", "Метеоролог", "Археолог", "Клоун", "Священник"
-    ];
-    const genders = ["Мужской", "Женский"];
-    const getAge = () => Math.floor(Math.random() * 81) + 20;
-    const bodyTypes = ["Худощавое", "Атлетичное", "Крепкое", "Полноватое", "Мускулистое", "Низкорослое (153 см)",
-        "Высокое (190 см)", "Очень высокое (2 м)", "Сутулое", "Жилистое", "Коренастое", "Изящное",
-        "Массивное", "С широкими плечами", "Хрупкое телосложение", "Среднее телосложение"];
-    const healthIssues = ["Здоров абсолютно", "Язва желудка", "Астма", "Диабет 2 типа", "Аллергия на пыльцу", "Мигрень",
-        "Гипертония", "Артрит", "Близорукость", "Плохое зрение", "Сердечная недостаточность", "Хронический бронхит",
-        "Псориаз", "Панические атаки", "Бессонница", "Склонность к переломам", "Слабая иммунная система", "Гастрит"];
-    const hobbies = ["Боевые искусства", "Игра на гитаре", "Шахматы", "Альпинизм", "Плавание", "Бег", "Чтение классики",
-        "Выживание в дикой природе", "Кулинария", "Садоводство", "Пчеловодство", "Рыбалка", "Охота", "Стрельба",
-        "Паркур", "Танцы", "Каллиграфия", "Астрономия", "Медитация", "Рукоделие", "Ремонт авто", "Йога"];
-    const phobias = ["Энтомофобия (боязнь насекомых)", "Арахнофобия (пауки)", "Клаустрофобия (замкнутое пространство)",
-        "Акрофобия (высота)", "Никтофобия (темнота)", "Гемофобия (кровь)", "Танатофобия (смерть)", "Агорафобия",
-        "Социофобия", "Дентофобия", "Кинофобия (собаки)", "Офидиофобия (змеи)", "Трипофобия", "Астрапофобия (гроза)"];
-    const inventory = ["Упаковка антибиотиков (Раскрыта)", "Фонарик (сели батарейки)", "Нож выживания", "Аптечка с бинтами",
-        "Зажигалка и сухой спирт", "Свисток", "Карта местности", "Пара носков", "Консервная банка тушёнки",
-        "Пластиковая бутылка воды", "Заряженный пауэрбанк", "Книга 'Как выжить в бункере'", "Противогаз (фильтр старый)",
-        "Топор", "Моток верёвки 15м", "Компас", "Рюкзак с семенами", "Бинокль", "Рация (слабая батарея)"];
-    const facts = ["Пишет стихи (Раскрыта)", "Был чемпионом по борьбе", "Имеет двойное гражданство", "Знает 5 языков",
-        "В прошлом сидел в тюрьме", "Выиграл в лотерею миллион", "Скрывается от коллекторов", "Талантливый повар",
-        "Страдает лунатизмом", "Сделал тату на всё лицо", "Когда-то спас утопающего", "Работал в цирке",
-        "Владеет секретной информацией", "Обожает азартные игры", "Был в секте", "Изучал ядерную физику"];
-    const specialAbilities = [
-        "Игрок не может голосовать в ближайшем голосовании. Игрок может быть изгнан только единогласно.",
-        "В критический момент может восстановить здоровье любому игроку (1 раз).",
-        "Может тайно подсмотреть профессию одного игрока.",
-        "При голосовании его голос считается за два.",
-        "Иммунитет к первому исключению.",
-        "Может один раз обменять свой инвентарь с другим игроком.",
-        "Знает секретный код от оружейной комнаты (получит пистолет).",
-        "Может потребовать переголосования один раз за игру.",
-        "Никто не может узнать его возраст и факт (тайна личности)."
-    ];
-    const randomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    const generateBunkerChar = (index) => ({
-        id: index, profession: randomElem(professions), gender: randomElem(genders), age: getAge(),
-        body: randomElem(bodyTypes), health: randomElem(healthIssues), hobby: randomElem(hobbies),
-        phobia: randomElem(phobias), inventory: randomElem(inventory), fact: randomElem(facts),
-        special: randomElem(specialAbilities)
-    });
-
-    // --------------------------------------------------------------
-    // 2. МАФИЯ (полностью убрали "Особенность" — никакого flavor)
-    // --------------------------------------------------------------
-    function getMafiaRolesDistribution(playersCount) {
-        let roles = [];
-        if (playersCount < 8) roles = ["Мафия", "Мафия", "Доктор", "Комиссар"];
-        else if (playersCount <= 9) roles = ["Мафия", "Мафия", "Доктор", "Комиссар"];
-        else {
-            roles = ["Мафия", "Мафия", "Дон мафии", "Доктор", "Комиссар", "Маньяк", "Смерть", "Вор"];
-        }
-        let remaining = playersCount - roles.length;
-        for (let i = 0; i < remaining; i++) roles.push("Мирный житель");
-        for (let i = roles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [roles[i], roles[j]] = [roles[j], roles[i]];
-        }
-        return roles;
-    }
-    function getRoleDescription(role) {
-        switch(role) {
-            case "Мафия": return "🩸 Каждую ночь убивает мирного. Общаются в чате мафии.";
-            case "Дон мафии": return "👑 Может проверить роль игрока ночью. Не может быть убит мафией.";
-            case "Доктор": return "💊 Лечит игрока ночью, спасает от убийства.";
-            case "Комиссар": return "🔍 Проверяет: мафия или мирный.";
-            case "Маньяк": return "🔪 Одиночка, убивает каждую ночь. Побеждает, если остаётся один.";
-            case "Смерть": return "💀 При своей гибели (днём или ночью) забирает одного игрока с собой.";
-            case "Вор": return "🎭 Один раз крадёт способность цели: если украл у мафии — может убить, у доктора — вылечить, у комиссара — проверить.";
-            default: return "🌾 Мирный житель. Днём голосует, ночью спит.";
-        }
-    }
-    function getRoleExtra(role) {
-        if (role === "Вор") return "🎲 Один раз укради способность у любого (убить/вылечить/проверить).";
-        if (role === "Смерть") return "⚰️ Пассивно: когда умираешь, выбери жертву — она умирает с тобой.";
-        return "";
-    }
-    function generateMafiaCard(id, role) {
-        return { id, role, roleDescription: getRoleDescription(role), extra: getRoleExtra(role) };
-    }
-
-    let currentMode = 'bunker';
-    function renderBunker(cnt) {
-        let players = []; for (let i=1;i<=cnt;i++) players.push(generateBunkerChar(i));
-        let html = '';
-        players.forEach(p => { html += `<div class="character-card"><div class="character-header">🧩 Игрок ${p.id}</div>
-            <div class="char-property"><span class="prop-label">Профессия</span><span class="prop-value">${p.profession}</span></div>
-            <div class="char-property"><span class="prop-label">Пол</span><span class="prop-value">${p.gender}</span></div>
-            <div class="char-property"><span class="prop-label">Возраст</span><span class="prop-value">${p.age} лет</span></div>
-            <div class="char-property"><span class="prop-label">Тело и рост</span><span class="prop-value">${p.body}</span></div>
-            <div class="char-property"><span class="prop-label">Здоровье</span><span class="prop-value">${p.health}</span></div>
-            <div class="char-property"><span class="prop-label">Хобби</span><span class="prop-value">${p.hobby}</span></div>
-            <div class="char-property"><span class="prop-label">Фобия</span><span class="prop-value">${p.phobia}</span></div>
-            <div class="char-property"><span class="prop-label">Инвентарь</span><span class="prop-value">${p.inventory}</span></div>
-            <div class="char-property"><span class="prop-label">Факт</span><span class="prop-value">${p.fact}</span></div>
-            <div class="char-property"><span class="prop-label">Спец. возможность</span><span class="prop-value">✨ ${p.special}</span></div>
-        </div>`; });
-        document.getElementById('cardsContainer').innerHTML = html;
-        const oldStat = document.getElementById('mafia-stats'); if(oldStat) oldStat.remove();
-    }
-    
-    function renderMafia(cnt) {
-        const rolesArr = getMafiaRolesDistribution(cnt);
-        let players = []; for(let i=0;i<cnt;i++) players.push(generateMafiaCard(i+1, rolesArr[i]));
-        let html = '';
-        players.forEach(p => {
-            let icon = "🎭"; 
-            if(p.role==="Мафия") icon="🔪"; 
-            else if(p.role==="Дон мафии") icon="👑"; 
-            else if(p.role==="Доктор") icon="💊"; 
-            else if(p.role==="Комиссар") icon="🔍"; 
-            else if(p.role==="Маньяк") icon="🪦"; 
-            else if(p.role==="Смерть") icon="💀"; 
-            else if(p.role==="Вор") icon="🎭";
-            
-            let extraBlock = p.extra ? `<div class="char-property"><span class="prop-label">Механика</span><span class="prop-value">✨ ${p.extra}</span></div>` : '';
-            let strategy = (p.role === "Мирный житель") ? "Анализируй, задавай вопросы, вычисляй мафию." : 
-                          (p.role === "Смерть") ? "Не раскрывайся рано, но можешь угрожать." : 
-                          (p.role === "Вор") ? "Выбери цель с умом, укради сильную способность." : 
-                          "Скрывай свои намерения, вводи в заблуждение.";
-            html += `<div class="character-card mafia-card"><div class="character-header">${icon} Игрок ${p.id}</div>
-                <div class="char-property"><span class="prop-label">Роль</span><span class="prop-value"><strong style="background:#3c2a2f; padding:2px 12px; border-radius:32px;">${p.role}</strong></span></div>
-                <div class="char-property"><span class="prop-label">Способность</span><span class="prop-value">${p.roleDescription}</span></div>
-                ${extraBlock}
-                <div class="char-property"><span class="prop-label">Стратегия</span><span class="prop-value">${strategy}</span></div>
-            </div>`;
-        });
-        document.getElementById('cardsContainer').innerHTML = html;
-        let roleCounts = {}; rolesArr.forEach(r=>{ roleCounts[r]=(roleCounts[r]||0)+1; });
-        let statDiv = document.getElementById('mafia-stats');
-        if(!statDiv){ statDiv = document.createElement('div'); statDiv.id='mafia-stats'; statDiv.className='stats-banner'; document.getElementById('cardsContainer').parentNode.appendChild(statDiv); }
-        let statText = `📜 Состав (${cnt} игроков): `; for(let [r,c] of Object.entries(roleCounts)) statText += `${r} — ${c}  `;
-        statDiv.innerHTML = statText;
-    }
-    
-    function generateByMode(){
-        let cnt = parseInt(document.getElementById('playersCount').value,10);
-        if(isNaN(cnt)) cnt=10; cnt = Math.min(18,Math.max(4,cnt));
-        document.getElementById('playersCount').value=cnt;
-        if(currentMode==='bunker') renderBunker(cnt);
-        else renderMafia(cnt);
-    }
-
-    // --------------------------------------------------------------
-    // 3. JACKBOX КОЛЕСО
-    // --------------------------------------------------------------
-    const JACKBOX_GAMES = [
-        "🎮 ВЫЖИТЬ В ИНЕТЕ",
-        "🍔 ВЫЖИТЬ В КАТЛЕТЕ",
-        "👾 МОНСТР ИЩЕТ МОНСТА",
-        "😂 СМЕХ ЛЫСТ 3",
-        "🔊 ЗВУК СЛУХ",
-        "🔫 МАФИЯ"
-    ];
-    const GAME_COLORS = ["#E67E22","#2ECC71","#E74C3C","#F1C40F","#3498DB","#9B59B6"];
-    let wheelCanvas = null, ctx = null;
-    let currentRotation = 0;
-    let spinning = false;
-
-    function drawWheel(rotationRad = 0) {
-        if(!ctx) return;
-        const w = wheelCanvas.width, h = wheelCanvas.height;
-        const centerX = w/2, centerY = h/2, radius = w*0.45;
-        ctx.clearRect(0,0,w,h);
-        const angleStep = (Math.PI * 2) / JACKBOX_GAMES.length;
-        for(let i=0;i<JACKBOX_GAMES.length;i++){
-            const start = i * angleStep + rotationRad;
-            const end = (i+1) * angleStep + rotationRad;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
-            ctx.fillStyle = GAME_COLORS[i % GAME_COLORS.length];
-            ctx.fill();
-            ctx.strokeStyle = "#2c1e12";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.fillStyle = "#fff9e8";
-            ctx.font = `bold ${Math.max(12, Math.floor(radius * 0.1))}px "Segoe UI"`;
-            ctx.save();
-            ctx.translate(centerX + Math.cos(start + angleStep/2) * radius * 0.7, centerY + Math.sin(start + angleStep/2) * radius * 0.7);
-            ctx.rotate(start + angleStep/2 + Math.PI/2);
-            let shortName = JACKBOX_GAMES[i].replace(/[^А-Яа-я0-9]/g,'').slice(0,8);
-            if(JACKBOX_GAMES[i].length > 10) shortName = JACKBOX_GAMES[i].slice(0,10);
-            ctx.fillText(shortName, -20, 6);
-            ctx.restore();
-        }
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius*0.12, 0, Math.PI*2);
-        ctx.fillStyle = "#FFD966";
-        ctx.fill();
-        ctx.fillStyle = "#4A2A1A";
-        ctx.font = "bold 24px monospace";
-        ctx.fillText("?", centerX-10, centerY+8);
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY-radius-8);
-        ctx.lineTo(centerX-12, centerY-radius+12);
-        ctx.lineTo(centerX+12, centerY-radius+12);
-        ctx.fillStyle = "#E6B422";
-        ctx.fill();
-    }
-
-    function getGameFromRotation(rotationRad){
-        const angleStep = (Math.PI * 2) / JACKBOX_GAMES.length;
-        let rawAngle = (Math.PI * 2 - (rotationRad % (Math.PI*2))) % (Math.PI*2);
-        let idx = Math.floor(rawAngle / angleStep) % JACKBOX_GAMES.length;
-        return JACKBOX_GAMES[idx];
-    }
-
-    function spinWheel() {
-        if(spinning) return;
-        spinning = true;
-        const startRot = currentRotation;
-        const spins = Math.random() * 8 + 8;
-        const targetDelta = (Math.random() * Math.PI * 2) + spins * Math.PI * 2;
-        const targetRotation = startRot + targetDelta;
-        const duration = 1800;
-        const startTime = performance.now();
-        function animateSpin(now){
-            const elapsed = now - startTime;
-            let t = Math.min(1, elapsed/duration);
-            const easeOut = 1 - Math.pow(1-t, 3);
-            const newRot = startRot + targetDelta * easeOut;
-            currentRotation = newRot;
-            drawWheel(currentRotation);
-            if(t<1){
-                requestAnimationFrame(animateSpin);
-            } else {
-                currentRotation = targetRotation;
-                drawWheel(currentRotation);
-                const finalGame = getGameFromRotation(currentRotation);
-                document.getElementById('wheelResult').innerHTML = `🎉 ВЫБРАНО: ${finalGame} 🎉`;
-                spinning = false;
-                setTimeout(()=>{
-                    if(confirm(`🎲 Игра определена: ${finalGame}\nХотите перейти в режим ${finalGame.includes("МАФИЯ") ? "МАФИИ" : "БУНКЕРА (по умолчанию)"}?`)){
-                        if(finalGame.includes("МАФИЯ")){
-                            currentMode = 'mafia';
-                            bunkerBtn.classList.remove('active');
-                            mafiaBtn.classList.add('active');
-                            generateByMode();
-                        } else {
-                            currentMode = 'bunker';
-                            mafiaBtn.classList.remove('active');
-                            bunkerBtn.classList.add('active');
-                            generateByMode();
-                        }
-                    }
-                }, 80);
-            }
-        }
-        requestAnimationFrame(animateSpin);
-    }
-
-    function openWheel(){
-        const modal = document.getElementById('wheelModal');
-        modal.classList.add('active');
-        if(!wheelCanvas){
-            wheelCanvas = document.getElementById('wheelCanvas');
-            ctx = wheelCanvas.getContext('2d');
-            drawWheel(currentRotation);
-        } else {
-            drawWheel(currentRotation);
-        }
-        document.getElementById('wheelResult').innerHTML = "Нажми КРУТИТЬ!";
-    }
-    function closeWheel(){
-        document.getElementById('wheelModal').classList.remove('active');
-        if(spinning){ spinning = false; }
-    }
-
-    // --------------------------------------------------------------
-    // 4. ИНИЦИАЛИЗАЦИЯ
-    // --------------------------------------------------------------
-    const bunkerBtn = document.getElementById('bunkerBtn');
-    const mafiaBtn = document.getElementById('mafiaBtn');
-    const jackBtn = document.getElementById('jackboxBtn');
-    const generateBtn = document.getElementById('generateMainBtn');
-    function setMode(mode){
-        currentMode = mode;
-        if(mode==='bunker'){ bunkerBtn.classList.add('active'); mafiaBtn.classList.remove('active'); }
-        else { mafiaBtn.classList.add('active'); bunkerBtn.classList.remove('active'); }
-        generateByMode();
-    }
-    bunkerBtn.onclick = ()=>setMode('bunker');
-    mafiaBtn.onclick = ()=>setMode('mafia');
-    generateBtn.onclick = ()=>generateByMode();
-    jackBtn.onclick = ()=>openWheel();
-    document.getElementById('spinWheelBtn').onclick = ()=>{ if(!spinning) spinWheel(); };
-    document.getElementById('closeWheelBtn').onclick = closeWheel;
-    if(wheelCanvas) wheelCanvas.addEventListener('click', ()=>{ if(!spinning) spinWheel(); });
-    
-    document.getElementById('playersCount').value = 10;
-    setMode('mafia');
-</script>
+  </div> <!-- /container -->
 </body>
 </html>
