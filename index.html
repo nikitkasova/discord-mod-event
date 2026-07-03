@@ -287,6 +287,18 @@
     .compact-list {
       margin-top: 0.1rem;
     }
+
+    /* discord contact chip */
+    .contact-chip {
+      background: #1e1e26;
+      border-radius: 40px;
+      padding: 0.25rem 1.2rem;
+      display: inline-block;
+      margin-top: 0.2rem;
+      border: 1px solid #31313b;
+      color: #b5bed0;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
@@ -359,16 +371,17 @@
         <p style="font-size:0.9rem; color:#a2a9b8; margin-top:0.2rem;">🔐 encrypted storage · access restricted</p>
       </div>
 
-      <!-- Contact & Changes (combined into two cards, but we keep them separate for clarity) -->
+      <!-- Contact -->
       <div class="policy-card">
         <h2>Contact</h2>
         <p><strong>Developer:</strong> Dimensions Studio</p>
         <p>For questions regarding this Privacy Policy, contact the developer through <strong>Discord</strong>.</p>
-        <div style="background:#1e1e26; border-radius:40px; padding:0.25rem 1.2rem; display:inline-block; margin-top:0.2rem; border:1px solid #31313b;">
-          <span style="color:#b5bed0;">✉️ Discord: @DimensionsStudio</span>
+        <div class="contact-chip">
+          ✉️ Discord: <span style="color:#d0d6e3;">@dimensions_studio</span>
         </div>
       </div>
 
+      <!-- Changes -->
       <div class="policy-card">
         <h2>Changes</h2>
         <p>This Privacy Policy may be updated at any time. Continued use of <strong>Test Bot</strong> means you accept the latest version.</p>
